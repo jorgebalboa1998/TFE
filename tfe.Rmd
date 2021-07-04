@@ -1,0 +1,79 @@
+---
+title: "TFE-Limpieza de datos"
+author: "Jorge Balboa Cirilo"
+date: "4/7/2021"
+output: pdf_document
+---
+
+#Importar los datos
+
+Limpiamos la lista e importamos las librerías necesarias:
+```{r}
+rm(list=ls())
+library(readr)
+```
+
+Dataset después del primer tratamiento con Python:
+```{r}
+df = read.csv(url(
+  "https://raw.githubusercontent.com/jorgebalboa1998/TFE/main/INT.csv"))
+
+df = df[-c(232:2087),-c(1)]
+```
+
+Para una mejor visualización, se trabaja con el mismo dataset, pero traspuesto (lo cual se realiza con Python):
+```{r}
+trans_df = read.csv(url(
+  "https://raw.githubusercontent.com/jorgebalboa1998/TFE/main/INT_trans.csv"))
+```
+
+#Limpieza de datos
+
+Quitar datos que sobran para trabajar con el consumo general de petróleo:
+```{r}
+trans_df = trans_df[, -c(233:2088)]
+trans_df[1:10, 1:4]
+```
+
+Cambiar nombres de las columnas y mejorar la presentación:
+```{r}
+colnames(trans_df) <- trans_df[1,]
+trans_df = trans_df[-c(1),]
+columnas = colnames(trans_df)
+columnas = gsub("  ","",columnas)
+colnames(trans_df) = columnas
+
+row.names(trans_df) <- trans_df[,1]
+trans_df = trans_df[,-c(1)]
+
+trans_df = trans_df[-c(1:7, 40, 41),]
+trans_df[1:10, 1:5]
+```
+
+Quitar "--" y poner "0":
+```{r}
+tfe <- data.frame(lapply(trans_df, function(x){
+  gsub("--","0",x)
+  }))
+
+colnames(tfe) <- colnames(trans_df)
+row.names(tfe) <- row.names(trans_df)
+```
+
+Asegurarse de que los datos son numéricos:
+```{r}
+for (i in (1:221)) {
+  tfe[,i] <- as.numeric(tfe[,i])
+}
+```
+
+El dataset final se guardará como __tfe.csv__, el cual se volverá a importar para trabajar con JupyterLab.
+
+
+
+
+
+
+
+
+
